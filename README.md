@@ -1,171 +1,230 @@
-# Asus
+local Rayfield = loadstring(game: HttpGet('https://sirius.menu/rayfield'))()
 
+local Window = Rayfield: CreateWindow({
+    Name = "Asus hub",
+    Icon = nil,
+    LoadingTitle = "Asus system",
+    LoadingSubtitle = "by nut",
+    Theme = "Default",
+    ToggleUIKeybind = "K",
+
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
+
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = nil,
+        FileName = "Aura Hub"
+    },
+
+    Discord = {
+        Enabled = true,
+        Invite = "JF2F2RANud",
+        RememberJoins = true
+    },
+
+    KeySystem = true,
+    KeySettings = {
+        Title = "Aura Keys",
+        Subtitle = "Key System",
+        Note = "Para conseguir a key, entre no discord da Asus",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = {
+            "asus",
+            "Ore",
+            "AsusHub"
+        }
+    }
+})
+
+local main = Window: CreateTab("main", 4483362458)
+local system = Window: CreateTab("system", 4483362458)
+local system = Window: CreateTab("sobre", 4483362458)
+
+    --Função: Matar Jogador
+local
+function MatarJogador()
 local player = game.Players.LocalPlayer
-repeat wait() until player and player.Character and player:FindFirstChild("PlayerGui")
+if player and player.Character and player.Character: FindFirstChild("Humanoid") then
+player.Character.Humanoid.Health = 0
+end
+end
 
-local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "NicolasGUI"
+main: CreateButton({
+        Name = "Matar Jogador",
+        Callback = MatarJogador
+    })
 
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 400, 0, 350)
-frame.Position = UDim2.new(0.5, -200, 0.5, -175)
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-frame.BorderSizePixel = 0
+    --Toggle: Flash
+main: CreateToggle({
+        Name = "Flash",
+        CurrentValue = false,
+        Callback = function (Value)
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character: FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = Value and 50 or 16
+        end
+        end
+    })
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, -40, 0, 40)
-title.Position = UDim2.new(0, 10, 0, 0)
-title.Text = "Menu do Nicolas"
-title.TextColor3 = Color3.new(1,1,1)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
-title.TextSize = 22
+    --Slider: JumpPower
+main: CreateSlider({
+        Name = "Pulo (JumpPower)",
+        Range = {
+            0,
+            100
+        },
+        Increment = 1,
+        Suffix = "",
+        CurrentValue = 50,
+        Callback = function (Value)
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character: FindFirstChild("Humanoid") then
+        player.Character.Humanoid.JumpPower = Value
+        end
+        end
+    })
 
--- Botão Fechar
-local closeBtn = Instance.new("TextButton", frame)
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0, 5)
-closeBtn.Text = "X"
-closeBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-closeBtn.TextColor3 = Color3.new(1,1,1)
-closeBtn.MouseButton1Click:Connect(function()
-    frame.Visible = false
-end)
+    --Input: Nome do NPC
+    main: CreateInput({
+        Name = "Nome do NPC",
+        PlaceholderText = "Digite um NPC...",
+        RemoveTextAfterFocusLost = false,
+        Callback = function (Text)
+        --ação com texto digitado
+        end
+    })
 
--- Botão Redimensionar
-local resizeBtn = Instance.new("TextButton", frame)
-resizeBtn.Size = UDim2.new(0, 30, 0, 30)
-resizeBtn.Position = UDim2.new(1, -70, 0, 5)
-resizeBtn.Text = "↔"
-resizeBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-resizeBtn.TextColor3 = Color3.new(1,1,1)
-local expanded = true
-resizeBtn.MouseButton1Click:Connect(function()
-    expanded = not expanded
-    frame.Size = expanded and UDim2.new(0, 400, 0, 350) or UDim2.new(0, 200, 0, 200)
-end)
+    --Dropdown: Selecionar NPC
+main: CreateDropdown({
+        Name = "Selecionar NPC",
+        Options = {
+            "Npc 1",
+            "Npc 2",
+            "Npc 3"
+        },
+        CurrentOption = "Npc 1",
+        Callback = function (Option)
+        --ação com opção selecionada
+        end
+    })
 
--- Funções
+    --Keybind: Exemplo
+main: CreateKeybind({
+        Name = "Atalho de Teclado",
+        CurrentKeybind = "F",
+        HoldToInteract = false,
+        Callback = function (Key)
+        --ação ao pressionar tecla
+        end
+    })
+
+    --Parágrafo: Criador
+main: CreateParagraph({
+        Title = "Criador",
+        Content = "Asus hub by nut"
+    })
+
+    --Mods: Fly com WASD + direção da câmera
 local flying = false
-local flyPart = nil
-local noclipActive = false
-local espActive = false
-local defaultSpeed = 16
-local defaultJump = 50
+local flySpeed = 50
+local direction = Vector3.zero
 
-function fly()
-    if flying then return end
-    flying = true
-    flyPart = Instance.new("BodyVelocity")
-    flyPart.Velocity = Vector3.new(0, 0, 0)
-    flyPart.MaxForce = Vector3.new(100000, 100000, 100000)
-    flyPart.Parent = player.Character.HumanoidRootPart
+local UIS = game: GetService("UserInputService")
+local RunService = game: GetService("RunService")
+local player = game.Players.LocalPlayer
 
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if flying then
-            flyPart.Velocity = player:GetMouse().Hit.lookVector * 50
-        end
-    end)
-end
+UIS.InputBegan: Connect(function (input, gameProcessed) if gameProcessed then
+    return end
+    if input.KeyCode == Enum.KeyCode.W then direction += Vector3.new(0, 0, -1) end
+    if input.KeyCode == Enum.KeyCode.S then direction += Vector3.new(0, 0, 1) end
+    if input.KeyCode == Enum.KeyCode.A then direction += Vector3.new(-1, 0, 0) end
+    if input.KeyCode == Enum.KeyCode.D then direction += Vector3.new(1, 0, 0) end
+    if input.KeyCode == Enum.KeyCode.Space then direction += Vector3.new(0, 1, 0) end
+    if input.KeyCode == Enum.KeyCode.LeftControl then direction += Vector3.new(0, -1, 0) end end)
 
-function unfly()
-    flying = false
-    if flyPart then flyPart:Destroy() flyPart = nil end
-end
+UIS.InputEnded: Connect(function (input) if input.KeyCode == Enum.KeyCode.W then direction -= Vector3.new(0, 0, -1) end
+    if input.KeyCode == Enum.KeyCode.S then direction -= Vector3.new(0, 0, 1) end
+    if input.KeyCode == Enum.KeyCode.A then direction -= Vector3.new(-1, 0, 0) end
+    if input.KeyCode == Enum.KeyCode.D then direction -= Vector3.new(1, 0, 0) end
+    if input.KeyCode == Enum.KeyCode.Space then direction -= Vector3.new(0, 1, 0) end
+    if input.KeyCode == Enum.KeyCode.LeftControl then direction -= Vector3.new(0, -1, 0) end end)
 
-function noclip()
-    noclipActive = true
-    game:GetService("RunService").Stepped:Connect(function()
-        if noclipActive then
-            for _, part in pairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = false end
-            end
-        end
-    end)
-end
+RunService.RenderStepped: Connect(function () if flying then local character = player.Character
+    if character and character: FindFirstChild("HumanoidRootPart") then local hrp = character.HumanoidRootPart local cam = workspace.CurrentCamera local moveDirection = cam.CFrame: VectorToWorldSpace(direction) hrp.Velocity = moveDirection * flySpeed character: FindFirstChild("Humanoid").PlatformStand = true end
+    else
+        local character = player.Character
+    if character and character: FindFirstChild("Humanoid") then character.Humanoid.PlatformStand = false end end end)
 
-function clip()
-    noclipActive = false
-    for _, part in pairs(player.Character:GetDescendants()) do
-        if part:IsA("BasePart") then part.CanCollide = true end
+main: CreateToggle({
+    Name = "Fly (WASD + Olhar)",
+    CurrentValue = false,
+    Callback = function (Value)
+    flying = Value
     end
-end
+})
 
-function esp()
-    espActive = true
-    for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local billboard = Instance.new("BillboardGui", plr.Character.HumanoidRootPart)
-            billboard.Name = "ESP"
-            billboard.Size = UDim2.new(0, 100, 0, 40)
-            billboard.AlwaysOnTop = true
-            local label = Instance.new("TextLabel", billboard)
-            label.Size = UDim2.new(1, 0, 1, 0)
-            label.Text = plr.Name
-            label.TextColor3 = Color3.new(1,1,1)
-            label.BackgroundTransparency = 1
+main: CreateSlider({
+        Name = "Velocidade do Fly",
+        Range = {
+            10,
+            200
+        },
+        Increment = 5,
+        Suffix = " u/s",
+        CurrentValue = 50,
+        Callback = function (Value)
+        flySpeed = Value
         end
-    end
+    })
+
+    --Mods: ESP
+local
+function ToggleESP(state)
+for _, player in pairs(game.Players: GetPlayers()) do
+    if player~ = game.Players.LocalPlayer and player.Character then
+local highlight = player.Character: FindFirstChild("Highlight")
+if state then
+if not highlight then
+highlight = Instance.new("Highlight")
+highlight.FillColor = Color3.fromRGB(255, 0, 0)
+highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+highlight.Parent = player.Character
+end
+else
+if highlight then
+highlight: Destroy()
+end
+end
+end
+end
 end
 
-function unesp()
-    for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local espGui = plr.Character.HumanoidRootPart:FindFirstChild("ESP")
-            if espGui then espGui:Destroy() end
+main: CreateToggle({
+        Name = "ESP",
+        CurrentValue = false,
+        Callback = function (Value)
+        ToggleESP(Value)
         end
+    })
+
+    --Mods: Noclip
+local noclip = false
+
+game: GetService("RunService").Stepped: Connect(function () if noclip then local character = game.Players.LocalPlayer.Character
+    if character then
+    for _, part in pairs(character: GetDescendants()) do
+        if part:
+    IsA("BasePart") then part.CanCollide = false end end end end end)
+
+main: CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Callback = function (Value)
+    noclip = Value
     end
-end
+})
 
--- Botões
-local function createButton(text, posY, callback)
-    local btn = Instance.new("TextButton", frame)
-    btn.Size = UDim2.new(0, 180, 0, 30)
-    btn.Position = UDim2.new(0, 10, 0, posY)
-    btn.Text = text
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 14
-    btn.MouseButton1Click:Connect(callback)
-end
-
-createButton("Fly", 50, fly)
-createButton("Unfly", 85, unfly)
-createButton("ESP", 120, esp)
-createButton("UnESP", 155, unesp)
-createButton("Noclip", 190, noclip)
-createButton("Clip", 225, clip)
-
--- Sliders
-local function createSlider(labelText, posY, defaultValue, onChange)
-    local label = Instance.new("TextLabel", frame)
-    label.Size = UDim2.new(0, 180, 0, 20)
-    label.Position = UDim2.new(0, 10, 0, posY)
-    label.Text = labelText
-    label.TextColor3 = Color3.new(1,1,1)
-    label.BackgroundTransparency = 1
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 14
-
-    local box = Instance.new("TextBox", frame)
-    box.Size = UDim2.new(0, 180, 0, 30)
-    box.Position = UDim2.new(0, 10, 0, posY + 25)
-    box.Text = tostring(defaultValue)
-    box.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    box.TextColor3 = Color3.new(1,1,1)
-    box.Font = Enum.Font.Gotham
-    box.TextSize = 14
-    box.FocusLost:Connect(function()
-        local val = tonumber(box.Text)
-        if val then onChange(val) end
-    end)
-end
-
-createSlider("Speed", 260, defaultSpeed, function(val)
-    player.Character.Humanoid.WalkSpeed = val
-end)
-
-createSlider("JumpPower", 315, defaultJump, function(val)
-    player.Character.Humanoid.JumpPower = val
-end)
+Rayfield: LoadConfiguration()
