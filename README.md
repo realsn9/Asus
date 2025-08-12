@@ -1,5 +1,5 @@
 # Asus
-Hhhh
+
 local player = game.Players.LocalPlayer
 repeat wait() until player and player.Character and player:FindFirstChild("PlayerGui")
 
